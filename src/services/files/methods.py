@@ -3,7 +3,7 @@ from fastapi import APIRouter, UploadFile, File
 from src import responses
 from src.services.files.s3_client import upload
 
-router = APIRouter(prefix="/files", tags=['files'])
+router = APIRouter(prefix="/files", tags=["files"])
 
 
 @router.post("/upload")

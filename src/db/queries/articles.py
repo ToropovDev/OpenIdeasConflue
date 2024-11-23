@@ -1,23 +1,33 @@
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, cast
 
 from sqlalchemy import select
 from sqlalchemy import insert, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src.db import models
+from src.db.queries.file_article import get_article_files
 from src.services.articles.schemas import Article, UpdateArticle
 
 
-async def create_article(conn: AsyncConnection, article: Article) -> None:
-    await conn.execute(
+async def create_article(conn: AsyncConnection, article: Article) -> uuid.UUID:
+    article_id = await conn.scalar(
         insert(
             models.article,
-        ).values(
-            article.model_dump(),
-        ),
+        )
+        .values(
+            article.model_dump(
+                exclude={
+                    "files",
+                },
+            ),
+        )
+        .returning(models.article.c.id),
     )
+
+    article_id = cast(uuid.UUID, article_id)
+    return article_id
 
 
 async def list_article(conn: AsyncConnection) -> List[Article]:
@@ -26,7 +36,15 @@ async def list_article(conn: AsyncConnection) -> List[Article]:
     )
     rows = list(await conn.execute(query))
 
-    return [Article.model_validate(row._asdict()) for row in rows]
+    articles = [Article.model_validate(row._asdict()) for row in rows]
+
+    for article in articles:
+        article.files = await get_article_files(
+            conn,
+            article_id=article.id,
+        )
+
+    return articles
 
 
 async def get_article(conn: AsyncConnection, article_id: uuid.UUID) -> Article:
@@ -42,7 +60,7 @@ async def get_article(conn: AsyncConnection, article_id: uuid.UUID) -> Article:
 
 async def update_article(
     conn: AsyncConnection,
-    comment_id: uuid.UUID,
+    article_id: uuid.UUID,
     updated_comment: UpdateArticle,
 ) -> None:
     await conn.execute(
@@ -50,10 +68,15 @@ async def update_article(
             models.article,
         )
         .where(
-            models.comment.c.id == comment_id,
+            models.article.c.id == article_id,
         )
         .values(
             updated_at=datetime.now(),
-            **updated_comment.model_dump(),
+            **updated_comment.model_dump(
+                exclude={
+                    "files",
+                },
+                exclude_none=True,
+            ),
         )
     )

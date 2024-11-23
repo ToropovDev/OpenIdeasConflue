@@ -11,7 +11,7 @@ class Article(BaseModel):
 
     name: str
     text: str
-    section: str = ""
+    section: str = "/"
     created_at: datetime = datetime.now()
     tags: dict[str, Any] = {}
     is_draft: bool = True

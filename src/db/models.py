@@ -9,6 +9,7 @@ from sqlalchemy import (
     JSON,
     Integer,
     Boolean,
+    ForeignKey,
 )
 import uuid
 
@@ -32,7 +33,7 @@ article = Table(
     Column("created_at", DateTime(True), nullable=False, server_default=func.now()),
     Column("updated_at", DateTime(True), nullable=True, server_default=func.now()),
     Column("tags", JSON, nullable=True),
-    Column("watching_count", Integer, nullable=False, default=0, server_default='0'),
+    Column("watching_count", Integer, nullable=False, default=0, server_default="0"),
     Column("is_draft", Boolean, nullable=False, default=True, server_default="true"),
 )
 
@@ -43,4 +44,12 @@ file = Table(
     Column("id", UUID, primary_key=True, default=uuid.uuid4, unique=True),
     Column("s3_link", String(512), nullable=False),
     Column("created_at", DateTime(True), server_default=func.now()),
+)
+
+file_article = Table(
+    "file_article",
+    metadata,
+    Column("id", UUID, primary_key=True, default=uuid.uuid4, unique=True),
+    Column("file_id", UUID, ForeignKey("file.id"), nullable=False),
+    Column("article_id", UUID, ForeignKey("article.id"), nullable=False),
 )

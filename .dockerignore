@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+.vim/
+
+.env
+.version
+.editorconfig
+.git/
+.venv/
+venv/
+**/__pycache__/
+**/.cache/
+**/.pytest_cache/
+**/.mypy_cache/
+.local/

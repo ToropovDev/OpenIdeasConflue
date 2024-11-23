@@ -1,14 +1,21 @@
 import uuid
+from typing import cast
+
 from fastapi import APIRouter
 from fastapi.params import Depends
+from starlette.responses import JSONResponse
 
 from src.db.base import connect as db_connect
 from src import responses
-from src.db.queries.articles import create_article as _create_article
+from src.db.queries.articles import (
+    create_article as _create_article,
+    update_article_is_draft,
+)
 from src.db.queries.articles import list_article as _list_article
 from src.db.queries.articles import update_article as _update_article
 from src.db.queries.articles import get_article as _get_article
-from src.services.articles.schemas import Article, UpdateArticle
+from src.db.queries.file_article import add_to_article, update_article_files
+from src.services.articles.schemas import UpdateArticle, ArticleCreate
 
 router = APIRouter(
     prefix="/articles",
@@ -18,13 +25,21 @@ router = APIRouter(
 
 @router.post("/")
 async def create_article(
-    article: Article = Depends(Article),
+    article: ArticleCreate = Depends(ArticleCreate),
 ):
     async with db_connect() as conn:
-        await _create_article(
+        article_id = await _create_article(
             conn=conn,
             article=article,
         )
+
+    async with db_connect() as conn:
+        for file_id in article.files:
+            await add_to_article(
+                conn,
+                article_id=article_id,
+                file_id=cast(uuid.UUID, file_id),
+            )
 
     return responses.OK(
         content={
@@ -62,10 +77,52 @@ async def get_article(
 @router.put("/{article_id}")
 async def update_article(
     article_id: uuid.UUID,
-    updated_comment: UpdateArticle = Depends(UpdateArticle),
+    updated_article: UpdateArticle = Depends(UpdateArticle),
 ):
     async with db_connect() as conn:
-        await _update_article(conn, article_id, updated_comment)
+        await _update_article(conn, article_id, updated_article)
+
+        await update_article_files(
+            conn,
+            article_id=article_id,
+            files=cast(list[uuid.UUID], updated_article.files),
+        )
+
+    return responses.OK(
+        content={
+            "details": None,
+        },
+    )
+
+
+@router.put("/publish/{article_id}")
+async def publish_article(
+    article_id: uuid.UUID,
+) -> JSONResponse:
+    async with db_connect() as conn:
+        await update_article_is_draft(
+            conn,
+            article_id=article_id,
+            is_draft=False,
+        )
+
+    return responses.OK(
+        content={
+            "details": None,
+        },
+    )
+
+
+@router.put("/unpublish/{article_id}")
+async def unpublish_article(
+    article_id: uuid.UUID,
+) -> JSONResponse:
+    async with db_connect() as conn:
+        await update_article_is_draft(
+            conn,
+            article_id=article_id,
+            is_draft=True,
+        )
 
     return responses.OK(
         content={

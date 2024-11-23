@@ -3,7 +3,7 @@ from src.db.base import connect as db_connect
 from fastapi import APIRouter, UploadFile, File
 
 from src import responses
-from src.db.queries.file_article import add_to_article, delete_from_article
+from src.db.queries.files import get_file as _get_file
 from src.services.files.s3_client import upload
 
 router = APIRouter(prefix="/files", tags=["files"])
@@ -24,39 +24,15 @@ async def upload_file(
     )
 
 
-@router.post("/add_to_article")
-async def add_file_to_article(
-    file_id: uuid.UUID,
-    article_id: uuid.UUID,
-):
+@router.get("/{file_id}")
+async def get_file(file_id: uuid.UUID):
     async with db_connect() as conn:
-        await add_to_article(
-            conn,
-            file_id=file_id,
-            article_id=article_id,
-        )
+        file = await _get_file(conn, file_id)
 
     return responses.OK(
         content={
-            "details": None,
-        },
-    )
-
-
-@router.delete("/delete_from_article")
-async def delete_file_from_article(
-    file_id: uuid.UUID,
-    article_id: uuid.UUID,
-):
-    async with db_connect() as conn:
-        await delete_from_article(
-            conn,
-            file_id=file_id,
-            article_id=article_id,
-        )
-
-    return responses.OK(
-        content={
-            "details": None,
+            "details": {
+                "file": file.model_dump(mode="json"),
+            },
         },
     )

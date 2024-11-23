@@ -7,7 +7,10 @@ from src.db import models
 from src.services.comments.schemas import Comment, UpdateComment
 
 
-async def create_comment(conn: AsyncConnection, comment: Comment) -> None:
+async def create_comment(
+    conn: AsyncConnection,
+    comment: Comment,
+) -> None:
     await conn.execute(
         insert(
             models.comment,
@@ -17,7 +20,9 @@ async def create_comment(conn: AsyncConnection, comment: Comment) -> None:
     )
 
 
-async def list_comments(conn: AsyncConnection) -> List[Comment]:
+async def list_comments(
+    conn: AsyncConnection,
+) -> List[Comment]:
     query = select(
         models.comment,
     )
@@ -26,7 +31,10 @@ async def list_comments(conn: AsyncConnection) -> List[Comment]:
     return [Comment.model_validate(row._asdict()) for row in rows]
 
 
-async def get_comment(conn: AsyncConnection, comment_id: uuid.UUID) -> Comment:
+async def get_comment(
+    conn: AsyncConnection,
+    comment_id: uuid.UUID,
+) -> Comment:
     query = select(
         models.comment,
     ).where(

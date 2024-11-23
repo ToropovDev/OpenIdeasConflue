@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.services.comments.methods import router as comment_router
+from src.services.files.methods import router as file_router
 
 app = FastAPI(
     version="0.0.1",
@@ -14,4 +15,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(comment_router)
+
+routers = [
+    comment_router,
+    file_router,
+]
+
+for router in routers:
+    app.include_router(router)

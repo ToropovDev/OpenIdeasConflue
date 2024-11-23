@@ -1,4 +1,4 @@
-from datetime import datetime, UTC
+from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
@@ -9,7 +9,7 @@ class Comment(BaseModel):
     )
 
     text: str
-    created_at: datetime = datetime.now(tz=UTC)
+    created_at: datetime = datetime.now()
 
 
 class UpdateComment(BaseModel):

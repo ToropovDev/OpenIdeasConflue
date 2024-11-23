@@ -61,7 +61,7 @@ async def get_comment(
     )
 
 
-@router.patch("/{comment_id}")
+@router.put("/{comment_id}")
 async def update_comment(
     comment_id: uuid.UUID,
     updated_comment: UpdateComment = Depends(UpdateComment),

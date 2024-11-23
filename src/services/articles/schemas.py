@@ -12,7 +12,7 @@ class ArticleBase(BaseModel):
 
     name: str
     text: str
-    section: str = "/"
+    section_id: uuid.UUID
     created_at: datetime = datetime.now()
     tags: dict[str, Any] = {}
     is_draft: bool = True
@@ -30,7 +30,7 @@ class Article(ArticleBase):
 class UpdateArticle(ArticleBase):
     name: str | None = None
     text: str | None = None
-    section: str | None = None
+    section_id: uuid.UUID
     created_at: datetime | None = None
     tags: dict[str, Any] | None = None
     is_draft: bool | None = None

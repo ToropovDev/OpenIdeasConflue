@@ -30,9 +30,14 @@ async def create_article(conn: AsyncConnection, article: Article) -> uuid.UUID:
     return article_id
 
 
-async def list_article(conn: AsyncConnection) -> List[Article]:
+async def list_article(
+    conn: AsyncConnection,
+    section_id: uuid.UUID,
+) -> List[Article]:
     query = select(
         models.article,
+    ).where(
+        models.article.c.section_id == section_id,
     )
     rows = list(await conn.execute(query))
 

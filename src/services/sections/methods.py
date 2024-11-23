@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.post("/")
 async def create_section(
-        section: Section = Depends(Section),
+    section: Section = Depends(Section),
 ) -> JSONResponse:
     async with db_connect() as conn:
         await _create_section(
@@ -51,7 +51,7 @@ async def list_sections() -> JSONResponse:
 
 @router.get("/{section_id}")
 async def get_sections(
-        section_id: uuid.UUID,
+    section_id: uuid.UUID,
 ) -> JSONResponse:
     async with db_connect() as conn:
         section = await _get_section(conn, section_id)
@@ -63,8 +63,8 @@ async def get_sections(
 
 @router.put("/{section_id}")
 async def update_sections(
-        section_id: uuid.UUID,
-        updated_section: UpdateSection = Depends(UpdateSection),
+    section_id: uuid.UUID,
+    updated_section: UpdateSection = Depends(UpdateSection),
 ) -> JSONResponse:
     async with db_connect() as conn:
         await _update_section(conn, section_id, updated_section)

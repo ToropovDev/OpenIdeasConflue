@@ -15,4 +15,3 @@ class UpdateSection(BaseModel):
     )
 
     name: str
-    parent_section_id: str

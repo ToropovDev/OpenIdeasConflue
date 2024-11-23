@@ -35,10 +35,13 @@ async def create_comment(
     )
 
 
-@router.get("/")
-async def list_comments() -> JSONResponse:
+@router.get("/by_article/{article_id}")
+async def list_comments(article_id: uuid.UUID) -> JSONResponse:
     async with db_connect() as conn:
-        comments = await _list_comments(conn)
+        comments = await _list_comments(
+            conn,
+            article_id=article_id,
+        )
 
     return responses.OK(
         content={

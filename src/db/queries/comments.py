@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import List
 
 from sqlalchemy import insert, select, update
@@ -22,10 +23,14 @@ async def create_comment(
 
 async def list_comments(
     conn: AsyncConnection,
+    article_id: uuid.UUID,
 ) -> List[Comment]:
     query = select(
         models.comment,
+    ).where(
+        models.comment.c.article_id == article_id,
     )
+
     rows = list(await conn.execute(query))
 
     return [Comment.model_validate(row._asdict()) for row in rows]
@@ -58,6 +63,7 @@ async def update_comment(
             models.comment.c.id == comment_id,
         )
         .values(
-            updated_comment.model_dump(),
+            updated_at=datetime.now(),
+            **updated_comment.model_dump(),
         )
     )

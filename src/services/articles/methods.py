@@ -26,7 +26,7 @@ router = APIRouter(
 @router.post("/")
 async def create_article(
     article: ArticleCreate = Depends(ArticleCreate),
-):
+) -> JSONResponse:
     async with db_connect() as conn:
         article_id = await _create_article(
             conn=conn,
@@ -48,10 +48,12 @@ async def create_article(
     )
 
 
-@router.get("/")
-async def list_articles():
+@router.get("/by-section/{section_id}")
+async def list_articles(
+    section_id: uuid.UUID,
+) -> JSONResponse:
     async with db_connect() as conn:
-        articles = await _list_article(conn)
+        articles = await _list_article(conn, section_id=section_id)
 
     return responses.OK(
         content={
@@ -65,7 +67,7 @@ async def list_articles():
 @router.get("/{article_id}")
 async def get_article(
     article_id: uuid.UUID,
-):
+) -> JSONResponse:
     async with db_connect() as conn:
         article = await _get_article(conn, article_id)
 
@@ -78,7 +80,7 @@ async def get_article(
 async def update_article(
     article_id: uuid.UUID,
     updated_article: UpdateArticle = Depends(UpdateArticle),
-):
+) -> JSONResponse:
     async with db_connect() as conn:
         await _update_article(conn, article_id, updated_article)
 

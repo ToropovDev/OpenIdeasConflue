@@ -80,3 +80,21 @@ async def update_article(
             ),
         )
     )
+
+
+async def update_article_is_draft(
+    conn: AsyncConnection,
+    article_id: uuid.UUID,
+    is_draft: bool,
+) -> None:
+    await conn.execute(
+        update(
+            models.article,
+        )
+        .where(
+            models.article.c.id == article_id,
+        )
+        .values(
+            is_draft=bool(is_draft),
+        )
+    )

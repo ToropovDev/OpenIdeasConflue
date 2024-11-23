@@ -3,7 +3,6 @@ from src.db.base import connect as db_connect
 from fastapi import APIRouter, UploadFile, File
 
 from src import responses
-from src.db.queries.file_article import add_to_article
 from src.db.queries.files import get_file as _get_file
 from src.services.files.s3_client import upload
 

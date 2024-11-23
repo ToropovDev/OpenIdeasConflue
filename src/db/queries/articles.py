@@ -1,7 +1,8 @@
 import uuid
+from datetime import datetime
 from typing import List
 
-from select import select
+from sqlalchemy import select
 from sqlalchemy import insert, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -46,12 +47,13 @@ async def update_article(
 ) -> None:
     await conn.execute(
         update(
-            models.comment,
+            models.article,
         )
         .where(
             models.comment.c.id == comment_id,
         )
         .values(
-            updated_comment.model_dump(),
+            updated_at=datetime.now(),
+            **updated_comment.model_dump(),
         )
     )

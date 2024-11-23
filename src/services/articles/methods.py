@@ -17,7 +17,7 @@ router = APIRouter(
 
 
 @router.post("/")
-async def create_article(article: Article = Depends(Article)):
+async def create_article(article: Article = Depends(Article),):
     async with db_connect() as conn:
         await _create_article(
             conn=conn,
@@ -46,7 +46,7 @@ async def list_articles():
 
 
 @router.get("/{article_id}")
-async def get_article(article_id: uuid.UUID):
+async def get_article(article_id: uuid.UUID,):
     async with db_connect() as conn:
         article = await _get_article(conn, article_id)
 
@@ -57,7 +57,7 @@ async def get_article(article_id: uuid.UUID):
 
 @router.patch("/{article_id}")
 async def update_article(
-    article_id: uuid.UUID, updated_comment: UpdateArticle = Depends(UpdateArticle)
+    article_id: uuid.UUID, updated_comment: UpdateArticle = Depends(UpdateArticle),
 ):
     async with db_connect() as conn:
         await _update_article(conn, article_id, updated_comment)

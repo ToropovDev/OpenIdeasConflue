@@ -7,7 +7,7 @@ from sqlalchemy import (
     UUID,
     func,
     JSON,
-    INT,
+    Integer,
     Boolean,
 )
 import uuid
@@ -27,15 +27,13 @@ article = Table(
     metadata,
     Column("id", UUID, primary_key=True, default=uuid.uuid4, unique=True),
     Column("name", String(64), nullable=False),
-    Column("text", String, nullable=False),
-    Column("chapter", INT, nullable=False),
-    Column("created_by", DateTime(True), nullable=False),
+    Column("text", String, nullable=False, default="", server_default=""),
+    Column("section", String, nullable=False),
     Column("created_at", DateTime(True), nullable=False, server_default=func.now()),
-    Column("updated_by", DateTime(True), nullable=False),
-    Column("updated_at", DateTime(True), nullable=False, server_default=func.now()),
-    Column("tags", JSON, nullable=False),
-    Column("watching_count", INT, nullable=False),
-    Column("is_draft", Boolean, nullable=False),
+    Column("updated_at", DateTime(True), nullable=True, server_default=func.now()),
+    Column("tags", JSON, nullable=True),
+    Column("watching_count", Integer, nullable=False, default=0, server_default='0'),
+    Column("is_draft", Boolean, nullable=False, default=True, server_default="true"),
 )
 
 

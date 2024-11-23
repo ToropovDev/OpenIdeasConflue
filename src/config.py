@@ -29,8 +29,8 @@ class _PGSettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="POSTGRES_")
 
 
-POSTGRES_HOST: str = env.str("POSTGRES_HOST", "unknown")
-POSTGRES_PORT: int = env.int("POSTGRES_PORT", "unknown")
+POSTGRES_HOST: str = env.str("POSTGRES_HOST", "0.0.0.0")
+POSTGRES_PORT: int = env.int("POSTGRES_PORT", 5433)
 POSTGRES_DATABASE: str = env.str("POSTGRES_DATABASE", "unknown")
 POSTGRES_USER: str = env.str("POSTGRES_USER", "unknown")
 POSTGRES_PASSWORD: str = env.str("POSTGRES_PASSWORD", "unknown")

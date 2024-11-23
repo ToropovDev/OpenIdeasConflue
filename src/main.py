@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.services.articles.methods import router as article_router
 from src.services.comments.methods import router as comment_router
+from src.services.sections.methods import router as section_router
 from src.services.files.methods import router as file_router
 
 app = FastAPI(
@@ -21,6 +22,7 @@ routers = [
     comment_router,
     file_router,
     article_router,
+    section_router,
 ]
 
 for router in routers:

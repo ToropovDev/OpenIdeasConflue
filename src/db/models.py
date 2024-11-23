@@ -28,6 +28,7 @@ article = Table(
     metadata,
     Column("id", UUID, primary_key=True, default=uuid.uuid4, unique=True),
     Column("name", String(64), nullable=False),
+    Column("section_id", UUID(as_uuid=True), ForeignKey("section.id", ondelete="CASCADE"), nullable=False),
     Column("text", String, nullable=False, default="", server_default=""),
     Column("section", String, nullable=False),
     Column("created_at", DateTime(True), nullable=False, server_default=func.now()),
@@ -35,6 +36,14 @@ article = Table(
     Column("tags", JSON, nullable=True),
     Column("watching_count", Integer, nullable=False, default=0, server_default="0"),
     Column("is_draft", Boolean, nullable=False, default=True, server_default="true"),
+)
+
+section = Table(
+    "section",
+    metadata,
+    Column("id", UUID, primary_key=True, default=uuid.uuid4(), unique=True),
+    Column("name", String(64), nullable=False),
+    Column("parent_section_id", UUID, nullable=True),
 )
 
 

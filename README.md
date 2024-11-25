@@ -15,8 +15,12 @@ docker compose up -d
 pip install -r requirements.txt 
 ```
 
+Актуализировать (или поднять с нуля) миграции БД:
+```
+alembic upgrade heads
+```
+
 Запуск приложения в тестовом режиме:
 ```
 uvicorn src.main:app --reload 
 ```
-

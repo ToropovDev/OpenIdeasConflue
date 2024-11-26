@@ -4,6 +4,8 @@ stages:
 build:
   stage: build
   image: docker:latest
+  services:
+    - docker:dind
   script:
     - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY

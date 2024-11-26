@@ -3,7 +3,7 @@ stages:
 
 build:
   stage: build
-  image: python:3.11
+  image: docker:3.11
   script:
     - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME .
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY

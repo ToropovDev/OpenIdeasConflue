@@ -13,6 +13,7 @@ build:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375/
   script:
+    - echo $CI_REGISTRY_IMAGE
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t $IMAGE_NAME:$CI_CONCURRENT_PROJECT_ID .
     - docker push $IMAGE_NAME:$CI_CONCURRENT_PROJECT_ID

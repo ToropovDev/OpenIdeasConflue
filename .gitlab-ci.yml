@@ -13,8 +13,9 @@ build:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375/
   script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_PROJECT_NAME:$CI_JOB_ID .
-    - docker tag $CI_PROJECT_NAME:$CI_JOB_ID $CI_PROJECT_NAME:latest
-    - docker tag $CI_PROJECT_NAME:$CI_JOB_ID $CI_REGISTRY_IMAGE:latest
-    - docker push $CI_REGISTRY_IMAGE:latest
+    - echo lower($CI_PROJECT_NAME)
+#    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+#    - docker build -t $CI_PROJECT_NAME:$CI_JOB_ID .
+#    - docker tag $CI_PROJECT_NAME:$CI_JOB_ID $CI_PROJECT_NAME:latest
+#    - docker tag $CI_PROJECT_NAME:$CI_JOB_ID $CI_REGISTRY_IMAGE:latest
+#    - docker push $CI_REGISTRY_IMAGE:latest

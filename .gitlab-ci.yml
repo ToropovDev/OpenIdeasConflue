@@ -14,4 +14,7 @@ build:
     - docker build -t $IMAGE_NAME:$CI_JOB_ID .
     - docker tag $IMAGE_NAME:$CI_JOB_ID $IMAGE_NAME:latest
     - docker tag $IMAGE_NAME:$CI_JOB_ID $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_JOB_ID
     - docker push $CI_REGISTRY_IMAGE:latest
+
+# NEED TESTS

@@ -37,7 +37,7 @@ article = Table(
 section = Table(
     "section",
     metadata,
-    Column("id", UUID, primary_key=True, default=uuid.uuid4(), unique=True),
+    Column("id", UUID, primary_key=True, default=uuid.uuid4, unique=True),
     Column("name", String(64), nullable=False),
     Column("parent_section_id", UUID, nullable=True),
 )

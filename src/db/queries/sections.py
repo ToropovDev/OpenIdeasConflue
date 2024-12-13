@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
-from src.services.sections.schemas import Section, UpdateSection, GetSection
+from src.services.sections.schemas import Section, UpdateSection
 
 
 async def create_section(

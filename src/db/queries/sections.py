@@ -4,22 +4,26 @@ from typing import List
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
-from src.services.sections.schemas import Section, UpdateSection
+from src.services.sections.schemas import Section, UpdateSection, GetSection
 
 
 async def create_section(
     conn: AsyncConnection,
     section: Section,
-) -> Section:
+) -> uuid.UUID:
     print("Creating new section", section)
-    await conn.execute(
-        insert(
-            models.section,
-        ).values(
-            section.model_dump(),
-        ),
-    )
-    return section
+    section_id = (
+        await conn.execute(
+            insert(
+                models.section,
+            )
+            .values(
+                section.model_dump(),
+            )
+            .returning(models.section.c.id),
+        )
+    ).fetchone()[0]
+    return section_id
 
 
 async def list_sections(

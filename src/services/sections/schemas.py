@@ -13,10 +13,5 @@ class Section(BaseModel):
     parent_section_id: Optional[uuid.UUID] = None
 
 
-class UpdateSection(BaseModel):
-    model_config = ConfigDict(
-        extra="ignore",
-    )
+class UpdateSection(Section): ...
 
-    name: str
-    parent_section_id: Optional[uuid.UUID] = None

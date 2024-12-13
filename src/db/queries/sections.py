@@ -28,13 +28,13 @@ async def create_section(
 
 async def list_sections(
     conn: AsyncConnection,
-) -> List[Section]:
+) -> List[GetSection]:
     query = select(
         models.section,
     )
     rows = list(await conn.execute(query))
 
-    return [Section.model_validate(row._asdict(), from_attributes=True) for row in rows]
+    return [GetSection.model_validate(row._asdict(), from_attributes=True) for row in rows]
 
 
 async def get_section(

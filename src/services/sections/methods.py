@@ -31,6 +31,7 @@ async def create_section(
     return responses.OK(
         content={
             "details": None,
+            "section_id": section.id,
         },
     )
 

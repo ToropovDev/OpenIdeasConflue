@@ -29,6 +29,8 @@ async def list_sections(
     )
     rows = list(await conn.execute(query))
 
+    print("Listing sections", rows)
+
     return [Section.model_validate(row._asdict()) for row in rows]
 
 

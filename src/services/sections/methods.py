@@ -23,7 +23,7 @@ async def create_section(
     section: Section = Depends(Section),
 ) -> JSONResponse:
     async with db_connect() as conn:
-        created_section = await _create_section(
+        created_section_id = await _create_section(
             conn=conn,
             section=section,
         )
@@ -31,7 +31,7 @@ async def create_section(
     return responses.OK(
         content={
             "details": None,
-            "section_id": created_section.id,
+            "section_id": str(created_section_id),
         },
     )
 

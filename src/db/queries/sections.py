@@ -10,7 +10,7 @@ from src.services.sections.schemas import Section, UpdateSection
 async def create_section(
     conn: AsyncConnection,
     section: Section,
-) -> None:
+) -> Section:
     print("Creating new section", section)
     await conn.execute(
         insert(
@@ -19,6 +19,7 @@ async def create_section(
             section.model_dump(),
         ),
     )
+    return section
 
 
 async def list_sections(
@@ -29,9 +30,7 @@ async def list_sections(
     )
     rows = list(await conn.execute(query))
 
-    print("Listing sections", rows)
-
-    return [Section.model_validate(row._asdict()) for row in rows]
+    return [Section.model_validate(row._asdict(), from_attributes=True) for row in rows]
 
 
 async def get_section(

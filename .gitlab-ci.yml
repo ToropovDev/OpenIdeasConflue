@@ -25,6 +25,7 @@ deploy-test:
   tags:
     - shell
   script:
+    - cd $DIRECTORY
     - docker compose down conflue
     - docker image remove $(docker images gitlab.teamops.com.ru:5050/teamops/openideasconflue --format {{.ID}})
     - docker compose up conflue -d

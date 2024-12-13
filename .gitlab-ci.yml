@@ -6,6 +6,8 @@ default:
 
 build:
   stage: build
+  tags:
+    - shared
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375/
@@ -17,3 +19,12 @@ build:
     - docker push $CI_REGISTRY_IMAGE:latest
 
 # NEED TESTS
+
+deploy-test:
+  stage: deploy
+  tags:
+    - shell
+  script:
+    - docker compose down conflue
+    - docker image remove $(docker images gitlab.teamops.com.ru:5050/teamops/openideasconflue --format {{.ID}})
+    - docker compose up conflue -d

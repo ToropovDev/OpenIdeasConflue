@@ -10,7 +10,7 @@ class Section(BaseModel):
     )
 
     name: str
-    parent_section_id: Optional[uuid.UUID]
+    parent_section_id: Optional[uuid.UUID] = None
 
 
 class UpdateSection(BaseModel):
@@ -19,4 +19,4 @@ class UpdateSection(BaseModel):
     )
 
     name: str
-    parent_section_id: Optional[uuid.UUID]
+    parent_section_id: Optional[uuid.UUID] = None

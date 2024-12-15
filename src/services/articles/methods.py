@@ -14,7 +14,7 @@ from src.db.queries.articles import (
 from src.db.queries.articles import list_article as _list_article
 from src.db.queries.articles import update_article as _update_article
 from src.db.queries.articles import get_article as _get_article
-from src.db.queries.file_article import add_to_article, update_article_files
+from src.db.queries.file_article import add_to_article
 from src.services.articles.schemas import UpdateArticle, ArticleCreate
 
 router = APIRouter(
@@ -83,12 +83,6 @@ async def update_article(
 ) -> JSONResponse:
     async with db_connect() as conn:
         await _update_article(conn, article_id, updated_article)
-
-        await update_article_files(
-            conn,
-            article_id=article_id,
-            files=cast(list[uuid.UUID], updated_article.files),
-        )
 
     return responses.OK(
         content={

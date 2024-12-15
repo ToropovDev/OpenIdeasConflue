@@ -1,9 +1,11 @@
 import uuid
-from typing import List
+from collections import defaultdict
+from typing import List, Any, Optional
 
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
+from src.services.articles.schemas import Article
 from src.services.sections.schemas import Section, UpdateSection, GetSection
 
 
@@ -26,15 +28,51 @@ async def create_section(
     return section_id
 
 
-async def list_sections(
-    conn: AsyncConnection,
-) -> List[GetSection]:
-    query = select(
-        models.section,
-    )
-    rows = list(await conn.execute(query))
+async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
+    section_query = select(models.section)
+    section_rows = await conn.execute(section_query)
+    sections = [
+        GetSection.model_validate(row._asdict(), from_attributes=True)
+        for row in section_rows
+    ]
 
-    return [GetSection.model_validate(row._asdict(), from_attributes=True) for row in rows]
+    article_query = select(models.article)
+    article_rows = await conn.execute(article_query)
+    articles = [
+        Article.model_validate(row._asdict(), from_attributes=True)
+        for row in article_rows
+    ]
+
+    articles_map: dict[uuid.UUID, List[Article]] = defaultdict(list)
+    for article in articles:
+        articles_map[article.section_id].append(article)
+
+    children_map: dict[Optional[uuid.UUID], List[GetSection]] = defaultdict(list)
+    for section in sections:
+        children_map[section.parent_section_id].append(section)
+
+    def attach_children_and_articles(section: GetSection) -> dict[str, Any]:
+        children = children_map.get(section.id, [])
+        return {
+            **section.model_dump(mode="json"),
+            "children": [
+                {
+                    **article.model_dump(mode="json"),
+                    "type": "article",
+                }
+                for article in articles_map.get(section.id, [])] + [
+                {
+                    **attach_children_and_articles(child),
+                    "type": "section",
+                }
+                for child in children
+            ],
+        }
+
+    root_sections = [
+        attach_children_and_articles(section) for section in children_map[None]
+    ]
+    return root_sections
 
 
 async def get_section(

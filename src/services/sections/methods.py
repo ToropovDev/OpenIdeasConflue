@@ -44,7 +44,7 @@ async def list_sections() -> JSONResponse:
     return responses.OK(
         content={
             "details": {
-                "sections": [section.model_dump(mode="json") for section in sections],
+                "sections": sections,
             },
         },
     )

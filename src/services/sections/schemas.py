@@ -15,5 +15,6 @@ class Section(BaseModel):
 
 class UpdateSection(Section): ...
 
+
 class GetSection(Section):
     id: uuid.UUID

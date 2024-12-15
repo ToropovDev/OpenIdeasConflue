@@ -2,7 +2,7 @@ import uuid
 from collections import defaultdict
 from typing import List, Any, Optional
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
 from src.services.articles.schemas import Article
@@ -60,7 +60,9 @@ async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
                     **article.model_dump(mode="json"),
                     "type": "article",
                 }
-                for article in articles_map.get(section.id, [])] + [
+                for article in articles_map.get(section.id, [])
+            ]
+            + [
                 {
                     **attach_children_and_articles(child),
                     "type": "section",
@@ -103,5 +105,38 @@ async def update_section(
         )
         .values(
             updated_section.model_dump(),
+        )
+    )
+
+
+async def delete_section(conn: AsyncConnection, section_id: uuid.UUID):
+    async def get_all_section_ids(section_id: uuid.UUID) -> List[uuid.UUID]:
+        query = select(models.section.c.id).where(
+            models.section.c.parent_section_id == section_id
+        )
+        rows = await conn.execute(query)
+        child_section_ids = [row[0] for row in rows]
+
+        all_ids = []
+        for child_id in child_section_ids:
+            all_ids.extend(await get_all_section_ids(child_id))
+        all_ids.append(section_id)
+        return all_ids
+
+    section_ids_to_delete = await get_all_section_ids(section_id)
+
+    await conn.execute(
+        delete(
+            models.article,
+        ).where(
+            models.article.c.section_id.in_(section_ids_to_delete),
+        )
+    )
+
+    await conn.execute(
+        delete(
+            models.section,
+        ).where(
+            models.section.c.id.in_(section_ids_to_delete),
         )
     )

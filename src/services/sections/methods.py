@@ -9,6 +9,7 @@ from src import responses
 from src.services.sections.schemas import Section, UpdateSection
 from src.db.queries.sections import create_section as _create_section
 from src.db.queries.sections import list_sections as _list_sections
+from src.db.queries.sections import delete_section as _delete_section
 from src.db.queries.sections import get_section as _get_section
 from src.db.queries.sections import update_section as _update_section
 
@@ -69,6 +70,20 @@ async def update_sections(
 ) -> JSONResponse:
     async with db_connect() as conn:
         await _update_section(conn, section_id, updated_section)
+
+    return responses.OK(
+        content={
+            "details": None,
+        },
+    )
+
+
+@router.delete("/{section_id}")
+async def delete_section(
+    section_id: uuid.UUID,
+) -> JSONResponse:
+    async with db_connect() as conn:
+        await _delete_section(conn, section_id)
 
     return responses.OK(
         content={

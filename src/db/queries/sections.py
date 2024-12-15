@@ -2,7 +2,9 @@ import uuid
 from collections import defaultdict
 from typing import List, Any, Optional
 
+import pydantic
 from sqlalchemy import insert, select, update, delete
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
 from src.services.articles.schemas import Article
@@ -13,7 +15,6 @@ async def create_section(
     conn: AsyncConnection,
     section: Section,
 ) -> uuid.UUID:
-    print("Creating new section", section)
     section_id = (
         await conn.execute(
             insert(
@@ -25,12 +26,14 @@ async def create_section(
             .returning(models.section.c.id),
         )
     ).fetchone()[0]
+
     return section_id
 
 
 async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
     section_query = select(models.section)
     section_rows = await conn.execute(section_query)
+
     sections = [
         GetSection.model_validate(row._asdict(), from_attributes=True)
         for row in section_rows
@@ -38,6 +41,7 @@ async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
 
     article_query = select(models.article)
     article_rows = await conn.execute(article_query)
+
     articles = [
         Article.model_validate(row._asdict(), from_attributes=True)
         for row in article_rows
@@ -71,10 +75,9 @@ async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
             ],
         }
 
-    root_sections = [
+    return [
         attach_children_and_articles(section) for section in children_map[None]
     ]
-    return root_sections
 
 
 async def get_section(
@@ -111,8 +114,8 @@ async def update_section(
 
 async def delete_section(conn: AsyncConnection, section_id: uuid.UUID):
     async def get_all_section_ids(section_id: uuid.UUID) -> List[uuid.UUID]:
-        query = select(models.section.c.id).where(
-            models.section.c.parent_section_id == section_id
+        query = select(models.section.c.id,).where(
+            models.section.c.parent_section_id == section_id,
         )
         rows = await conn.execute(query)
         child_section_ids = [row[0] for row in rows]
@@ -120,6 +123,7 @@ async def delete_section(conn: AsyncConnection, section_id: uuid.UUID):
         all_ids = []
         for child_id in child_section_ids:
             all_ids.extend(await get_all_section_ids(child_id))
+
         all_ids.append(section_id)
         return all_ids
 

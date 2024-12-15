@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
+
+from src import responses
 from src.services.articles.methods import router as article_router
 from src.services.comments.methods import router as comment_router
 from src.services.sections.methods import router as section_router
@@ -16,6 +21,37 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def error_handling_middleware(request: Request, call_next):
+    try:
+        response = await call_next(request)
+        return response
+
+    except ValidationError as e:
+        return responses.ValidationError(
+            content={
+                "details": str(e),
+                "error": "Validation error",
+            },
+        )
+
+    except IntegrityError as e:
+        return responses.BadRequest(
+            content={
+                "details": str(e),
+                "error": "Integrity error",
+            },
+        )
+
+    except BaseException:
+        return responses.InternalError(
+            content={
+                "details": None,
+                "error": "Internal error",
+            },
+        )
 
 
 routers = [

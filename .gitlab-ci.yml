@@ -30,6 +30,6 @@ deploy-test:
     - echo "Удаляю устаревшие образы, если они есть"
     - if [ "$(docker images --format {{.ID}})" ]; then docker image remove -f $(docker images --format {{.ID}}); else echo "Нет образов для удаления"; fi
     - echo "Заполняю env файл"
-    - $ENV_FILE >> .env
+    - echo $ENV_FILE >> .env
     - echo "Запускаю новую версию сервиса"
     - docker compose up -d

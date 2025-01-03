@@ -25,7 +25,9 @@ deploy-test:
   tags:
     - shell
   script:
-    - cd $DIRECTORY
-    - docker compose down conflue
-    - docker image remove $(docker images gitlab.teamops.com.ru:5050/teamops/openideasconflue --format {{.ID}})
-    - docker compose up conflue -d
+    - echo "Останавливаю запущенные контейнеры"
+    - docker stop $(docker ps --format {{.ID}})
+    - echo "Удаляю устаревшие образы"
+    - docker image remove $(docker images --format {{.ID}})
+    - echo "Запускаю новую версию сервиса"
+    - docker compose up -d

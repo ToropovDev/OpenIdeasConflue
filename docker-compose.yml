@@ -9,7 +9,7 @@ services:
         POSTGRES_USER: "open-ideas"
         POSTGRES_PASSWORD: "12345678"
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - /db-data:/var/lib/postgresql/data
   conflue:
     image: gitlab.teamops.com.ru:5050/teamops/openideasconflue:latest
     ports:

@@ -50,7 +50,7 @@ async def list_sections() -> JSONResponse:
 
 
 @router.get("/{section_id}")
-async def get_sections(
+async def get_section(
     section_id: uuid.UUID,
 ) -> JSONResponse:
     async with db_connect() as conn:
@@ -62,7 +62,7 @@ async def get_sections(
 
 
 @router.put("/{section_id}")
-async def update_sections(
+async def update_section(
     section_id: uuid.UUID,
     updated_section: UpdateSection = Depends(UpdateSection),
 ) -> JSONResponse:

@@ -10,6 +10,7 @@ from sqlalchemy import (
     Integer,
     Boolean,
     ForeignKey,
+    CheckConstraint,
 )
 import uuid
 
@@ -67,4 +68,14 @@ comment = Table(
     Column("created_at", DateTime(True), server_default=func.now()),
     Column("updated_at", DateTime(True), nullable=True),
     Column("article_id", UUID, ForeignKey("article.id"), nullable=False),
+)
+
+score = Table(
+    "score",
+    metadata,
+    Column("id", UUID, primary_key=True, default=uuid.uuid4, unique=True),
+    Column("value", Integer, nullable=False),
+    Column("created_at", DateTime(True), server_default=func.now()),
+    Column("article_id", UUID, ForeignKey("article.id"), nullable=False),
+    CheckConstraint("value >= 1 AND value <= 5", name="check_value_range"),
 )

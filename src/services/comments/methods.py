@@ -10,6 +10,7 @@ from src.services.comments.schemas import Comment, UpdateComment
 from src.db.queries.comments import create_comment as _create_comment
 from src.db.queries.comments import list_comments as _list_comments
 from src.db.queries.comments import get_comment as _get_comment
+from src.db.queries.comments import delete_comment as _delete_comment
 from src.db.queries.comments import update_comment as _update_comment
 
 router = APIRouter(
@@ -71,6 +72,20 @@ async def update_comment(
 ) -> JSONResponse:
     async with db_connect() as conn:
         await _update_comment(conn, comment_id, updated_comment)
+
+    return responses.OK(
+        content={
+            "details": None,
+        },
+    )
+
+
+@router.delete("/{comment_id}")
+async def delete_comment(
+    comment_id: uuid.UUID,
+) -> JSONResponse:
+    async with db_connect() as conn:
+        await _delete_comment(conn, comment_id)
 
     return responses.OK(
         content={

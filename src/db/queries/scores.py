@@ -1,13 +1,11 @@
 import uuid
 from typing import List
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
-from src.services.scores.schemas import (
-    Score,
-    ScoreUpdate,
-)
+from src.services.scores.schemas import Score, ScoreRead
+from src.services.scores.schemas import ScoreUpdate
 
 
 async def create_score(
@@ -26,7 +24,7 @@ async def create_score(
 async def list_scores(
     conn: AsyncConnection,
     article_id: uuid.UUID,
-) -> List[Score]:
+) -> List[ScoreRead]:
     query = select(
         models.score,
     ).where(
@@ -35,13 +33,13 @@ async def list_scores(
 
     rows = list(await conn.execute(query))
 
-    return [Score.model_validate(row._asdict()) for row in rows]
+    return [ScoreRead.model_validate(row._asdict()) for row in rows]
 
 
 async def get_score(
     conn: AsyncConnection,
     score_id: uuid.UUID,
-) -> Score:
+) -> ScoreRead:
     query = select(
         models.score,
     ).where(
@@ -52,7 +50,7 @@ async def get_score(
     if result is None:
         raise ValueError(f"Score with id {score_id} not found")
 
-    return Score.model_validate(result._asdict())
+    return ScoreRead.model_validate(result._asdict())
 
 
 async def update_score(
@@ -69,5 +67,18 @@ async def update_score(
         )
         .values(
             **updated_score.model_dump(),
+        )
+    )
+
+
+async def delete_score(
+    conn: AsyncConnection,
+    score_id: uuid.UUID,
+) -> None:
+    await conn.execute(
+        delete(
+            models.score,
+        ).where(
+            models.score.c.id == score_id,
         )
     )

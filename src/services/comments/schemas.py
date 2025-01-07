@@ -14,6 +14,10 @@ class Comment(BaseModel):
     created_at: datetime = datetime.now()
 
 
+class CommentRead(Comment):
+    id: uuid.UUID
+
+
 class UpdateComment(BaseModel):
     model_config = ConfigDict(
         extra="ignore",

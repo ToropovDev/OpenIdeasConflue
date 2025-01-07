@@ -12,7 +12,7 @@ from src.services.files.methods import router as file_router
 from src.services.scores.methods import router as scores_router
 
 app = FastAPI(
-    version="0.0.1",
+    version="1.0.0",
 )
 
 app.add_middleware(
@@ -56,11 +56,11 @@ async def error_handling_middleware(request: Request, call_next):
 
 
 routers = [
-    comment_router,
-    file_router,
-    article_router,
     section_router,
+    article_router,
+    comment_router,
     scores_router,
+    file_router,
 ]
 
 for router in routers:

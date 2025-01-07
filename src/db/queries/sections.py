@@ -2,9 +2,10 @@ import uuid
 from collections import defaultdict
 from typing import List, Any, Optional
 
-from sqlalchemy import insert, select, update, delete
+from sqlalchemy import insert, select, update, delete, func
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
+from src.db.queries.file_article import get_article_files
 from src.services.articles.schemas import Article
 from src.services.sections.schemas import Section, UpdateSection, GetSection
 
@@ -40,10 +41,26 @@ async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
     article_query = select(models.article)
     article_rows = await conn.execute(article_query)
 
-    articles = [
-        Article.model_validate(row._asdict(), from_attributes=True)
-        for row in article_rows
-    ]
+    articles = []
+    for row in article_rows:
+        article_data = row._asdict()
+
+        avg_score_query = select(
+            func.avg(models.score.c.value).label("avg_score"),
+        ).where(
+            models.score.c.article_id == article_data["id"],
+        )
+
+        avg_score_result = await conn.execute(avg_score_query)
+        avg_score = avg_score_result.scalar()
+        article_data["avg_score"] = avg_score if avg_score is not None else 0
+
+        article_data["files"] = await get_article_files(
+            conn,
+            article_id=article_data["id"],
+        )
+
+        articles.append(Article.model_validate(article_data))
 
     articles_map: dict[uuid.UUID, List[Article]] = defaultdict(list)
     for article in articles:
@@ -126,6 +143,30 @@ async def delete_section(conn: AsyncConnection, section_id: uuid.UUID):
         return all_ids
 
     section_ids_to_delete = await get_all_section_ids(section_id)
+
+    article_query = select(
+        models.article.c.id,
+    ).where(
+        models.article.c.section_id.in_(section_ids_to_delete),
+    )
+    article_rows = await conn.execute(article_query)
+    article_ids_to_delete = [row[0] for row in article_rows]
+
+    if article_ids_to_delete:
+        await conn.execute(
+            delete(
+                models.score,
+            ).where(
+                models.score.c.article_id.in_(article_ids_to_delete),
+            )
+        )
+        await conn.execute(
+            delete(
+                models.comment,
+            ).where(
+                models.comment.c.article_id.in_(article_ids_to_delete),
+            )
+        )
 
     await conn.execute(
         delete(

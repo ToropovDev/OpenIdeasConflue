@@ -9,10 +9,13 @@ class Score(BaseModel):
         extra="ignore",
     )
 
-    id: uuid.UUID
     value: conint(ge=1, le=5)
     article_id: uuid.UUID
     created_at: datetime = datetime.now()
+
+
+class ScoreRead(Score):
+    id: uuid.UUID
 
 
 class ScoreUpdate(BaseModel):

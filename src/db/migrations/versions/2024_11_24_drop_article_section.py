@@ -48,6 +48,6 @@ def downgrade() -> None:
         "article",
         sa.Column("section", sa.VARCHAR(), autoincrement=False, nullable=False),
     )
-    op.drop_constraint(None, "article", type_="foreignkey")
+    op.drop_constraint(None, "article", type_="foreignkey")  # type: ignore
     op.drop_column("article", "section_id")
     # ### end Alembic commands ###

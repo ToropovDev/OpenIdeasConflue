@@ -2,7 +2,7 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from asyncpg import Connection
+from asyncpg import Connection  # type: ignore
 from sqlalchemy.ext.asyncio import AsyncConnection
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import NullPool

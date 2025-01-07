@@ -2,16 +2,25 @@ import uuid
 from datetime import datetime
 from typing import List, cast
 
-from sqlalchemy import select, func, and_, delete
-from sqlalchemy import insert, update
+from sqlalchemy import select
+from sqlalchemy import func
+from sqlalchemy import and_
+from sqlalchemy import delete
+from sqlalchemy import insert
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src.db import models
 from src.db.queries.file_article import get_article_files
-from src.services.articles.schemas import Article, UpdateArticle, ArticleCreate
+from src.services.articles.schemas import ArticleSchema
+from src.services.articles.schemas import ArticleUpdateSchema
+from src.services.articles.schemas import ArticleCreateSchema
 
 
-async def create_article(conn: AsyncConnection, article: ArticleCreate) -> uuid.UUID:
+async def create_article(
+    conn: AsyncConnection,
+    article: ArticleCreateSchema,
+) -> uuid.UUID:
     article_id = await conn.scalar(
         insert(
             models.article,
@@ -23,7 +32,9 @@ async def create_article(conn: AsyncConnection, article: ArticleCreate) -> uuid.
                 },
             ),
         )
-        .returning(models.article.c.id),
+        .returning(
+            models.article.c.id,
+        ),
     )
 
     article_id = cast(uuid.UUID, article_id)
@@ -33,7 +44,7 @@ async def create_article(conn: AsyncConnection, article: ArticleCreate) -> uuid.
 async def list_article(
     conn: AsyncConnection,
     section_id: uuid.UUID,
-) -> List[Article]:
+) -> List[ArticleSchema]:
     query = select(
         models.article,
     ).where(
@@ -63,12 +74,15 @@ async def list_article(
             article_id=article_data["id"],
         )
 
-        articles.append(Article.model_validate(article_data))
+        articles.append(ArticleSchema.model_validate(article_data))
 
     return articles
 
 
-async def get_article(conn: AsyncConnection, article_id: uuid.UUID) -> Article:
+async def get_article(
+    conn: AsyncConnection,
+    article_id: uuid.UUID,
+) -> ArticleSchema:
     query = select(
         models.article,
     ).where(
@@ -85,14 +99,17 @@ async def get_article(conn: AsyncConnection, article_id: uuid.UUID) -> Article:
     avg_score_result = await conn.execute(avg_score_query)
     avg_score = avg_score_result.scalar()
 
-    article = Article.model_validate(
+    if not result:
+        raise ValueError(f"Could not get article: {article_id}")
+
+    article = ArticleSchema.model_validate(
         {
             **result._asdict(),
             "avg_score": avg_score if avg_score is not None else 0,
         },
     )
 
-    article.files = await get_article_files(
+    article.files = await get_article_files(  # type: ignore
         conn,
         article_id=article.id,
     )
@@ -103,7 +120,7 @@ async def get_article(conn: AsyncConnection, article_id: uuid.UUID) -> Article:
 async def update_article(
     conn: AsyncConnection,
     article_id: uuid.UUID,
-    updated_comment: UpdateArticle,
+    updated_comment: ArticleUpdateSchema,
 ) -> None:
     await conn.execute(
         update(

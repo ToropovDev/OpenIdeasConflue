@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class Comment(BaseModel):
+class CommentSchema(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
@@ -14,11 +14,11 @@ class Comment(BaseModel):
     created_at: datetime = datetime.now()
 
 
-class CommentRead(Comment):
+class CommentGetSchema(CommentSchema):
     id: uuid.UUID
 
 
-class UpdateComment(BaseModel):
+class CommentUpdateSchema(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )

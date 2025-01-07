@@ -1,7 +1,7 @@
 import hashlib
 from pathlib import Path
 
-import boto3
+import boto3  # type: ignore
 from fastapi import UploadFile
 from typing_extensions import BinaryIO
 

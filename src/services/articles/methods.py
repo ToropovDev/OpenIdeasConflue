@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import cast
 
@@ -15,17 +16,21 @@ from src.db.queries.articles import list_article as _list_article
 from src.db.queries.articles import update_article as _update_article
 from src.db.queries.articles import get_article as _get_article
 from src.db.queries.file_article import add_to_article
-from src.services.articles.schemas import UpdateArticle, ArticleCreate
+from src.services.articles.schemas import ArticleUpdateSchema
+from src.services.articles.schemas import ArticleCreateSchema
 
 router = APIRouter(
     prefix="/articles",
     tags=["articles"],
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 @router.post("/")
 async def create_article(
-    article: ArticleCreate = Depends(ArticleCreate),
+    article: ArticleCreateSchema = Depends(ArticleCreateSchema),  # type: ignore
 ) -> JSONResponse:
     async with db_connect() as conn:
         article_id = await _create_article(
@@ -41,6 +46,10 @@ async def create_article(
                 file_id=cast(uuid.UUID, file_id),
             )
 
+    logger.info(
+        f"Created new article in section {article.section_id} - article: {article.name} {article_id}"
+    )
+
     return responses.OK(
         content={
             "details": None,
@@ -55,6 +64,8 @@ async def list_articles(
 ) -> JSONResponse:
     async with db_connect() as conn:
         articles = await _list_article(conn, section_id=section_id)
+
+    logger.info(f"Listed articles in section {section_id}")
 
     return responses.OK(
         content={
@@ -72,6 +83,8 @@ async def get_article(
     async with db_connect() as conn:
         article = await _get_article(conn, article_id)
 
+    logger.info(f"Retrieved article {article_id}")
+
     return responses.OK(
         content={"articles": article.model_dump(mode="json")},
     )
@@ -80,10 +93,12 @@ async def get_article(
 @router.put("/{article_id}")
 async def update_article(
     article_id: uuid.UUID,
-    updated_article: UpdateArticle = Depends(UpdateArticle),
+    updated_article: ArticleUpdateSchema = Depends(ArticleUpdateSchema),  # type: ignore
 ) -> JSONResponse:
     async with db_connect() as conn:
         await _update_article(conn, article_id, updated_article)
+
+    logger.info(f"Updated article {article_id}")
 
     return responses.OK(
         content={
@@ -103,6 +118,8 @@ async def publish_article(
             is_draft=False,
         )
 
+    logger.info(f"Published article {article_id}")
+
     return responses.OK(
         content={
             "details": None,
@@ -121,6 +138,8 @@ async def unpublish_article(
             is_draft=True,
         )
 
+    logger.info(f"Unpublished article {article_id}")
+
     return responses.OK(
         content={
             "details": None,
@@ -134,6 +153,8 @@ async def delete_article(
 ) -> JSONResponse:
     async with db_connect() as conn:
         await _delete_article(conn, article_id)
+
+    logger.info(f"Deleted article {article_id}")
 
     return responses.OK(
         content={

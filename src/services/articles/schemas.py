@@ -5,7 +5,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, confloat
 
 
-class ArticleBase(BaseModel):
+class ArticleBaseSchema(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
@@ -19,16 +19,16 @@ class ArticleBase(BaseModel):
     files: list[str] = []
 
 
-class ArticleCreate(ArticleBase): ...
+class ArticleCreateSchema(ArticleBaseSchema): ...
 
 
-class Article(ArticleBase):
+class ArticleSchema(ArticleBaseSchema):
     id: uuid.UUID
     created_at: datetime = datetime.now()
-    avg_score: confloat(ge=0, le=5)
+    avg_score: confloat(ge=0, le=5)  # type: ignore
 
 
-class UpdateArticle(ArticleBase):
+class ArticleUpdateSchema(BaseModel):
     name: str | None = None
     text: str | None = None
     section_id: uuid.UUID

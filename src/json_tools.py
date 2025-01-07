@@ -3,7 +3,7 @@ from typing import Any
 from uuid import UUID
 
 import orjson
-from asyncpg.pgproto.pgproto import UUID as PG_UUID
+from asyncpg.pgproto.pgproto import UUID as PG_UUID  # type: ignore
 
 DecodeError = orjson.JSONDecodeError
 EncodeError = orjson.JSONEncodeError
@@ -29,7 +29,3 @@ def byte_encoder(obj: Any, option: int = 0) -> bytes:
 
 def encoder(obj: Any, option: int = 0) -> str:
     return byte_encoder(obj, option).decode()
-
-
-def decoder(obj: str | bytes) -> Any:
-    return orjson.loads(obj)

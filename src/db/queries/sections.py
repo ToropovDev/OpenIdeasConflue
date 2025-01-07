@@ -2,17 +2,23 @@ import uuid
 from collections import defaultdict
 from typing import List, Any, Optional
 
-from sqlalchemy import insert, select, update, delete, func
+from sqlalchemy import insert
+from sqlalchemy import delete
+from sqlalchemy import select
+from sqlalchemy import update
+from sqlalchemy import func
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
 from src.db.queries.file_article import get_article_files
-from src.services.articles.schemas import Article
-from src.services.sections.schemas import Section, UpdateSection, GetSection
+from src.services.articles.schemas import ArticleSchema
+from src.services.sections.schemas import SectionSchema
+from src.services.sections.schemas import SectionUpdateSchema
+from src.services.sections.schemas import SectionGetSchema
 
 
 async def create_section(
     conn: AsyncConnection,
-    section: Section,
+    section: SectionSchema,
 ) -> uuid.UUID:
     section_id = (
         await conn.execute(
@@ -24,9 +30,12 @@ async def create_section(
             )
             .returning(models.section.c.id),
         )
-    ).fetchone()[0]
+    ).fetchone()
 
-    return section_id
+    if not section_id:
+        raise ValueError(f"Could not create section: {section}")
+
+    return section_id[0]
 
 
 async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
@@ -34,7 +43,7 @@ async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
     section_rows = await conn.execute(section_query)
 
     sections = [
-        GetSection.model_validate(row._asdict(), from_attributes=True)
+        SectionGetSchema.model_validate(row._asdict(), from_attributes=True)
         for row in section_rows
     ]
 
@@ -60,17 +69,17 @@ async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
             article_id=article_data["id"],
         )
 
-        articles.append(Article.model_validate(article_data))
+        articles.append(ArticleSchema.model_validate(article_data))
 
-    articles_map: dict[uuid.UUID, List[Article]] = defaultdict(list)
+    articles_map: dict[uuid.UUID, List[ArticleSchema]] = defaultdict(list)
     for article in articles:
         articles_map[article.section_id].append(article)
 
-    children_map: dict[Optional[uuid.UUID], List[GetSection]] = defaultdict(list)
+    children_map: dict[Optional[uuid.UUID], List[SectionGetSchema]] = defaultdict(list)
     for section in sections:
         children_map[section.parent_section_id].append(section)
 
-    def attach_children_and_articles(section: GetSection) -> dict[str, Any]:
+    def attach_children_and_articles(section: SectionGetSchema) -> dict[str, Any]:
         children = children_map.get(section.id, [])
         return {
             **section.model_dump(mode="json"),
@@ -96,7 +105,7 @@ async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
 async def get_section(
     conn: AsyncConnection,
     section_id: uuid.UUID,
-) -> Section:
+) -> SectionSchema:
     query = select(
         models.section,
     ).where(
@@ -104,13 +113,17 @@ async def get_section(
     )
 
     result = (await conn.execute(query)).fetchone()
-    return Section.model_validate(result._asdict())
+
+    if not result:
+        raise ValueError(f"Could not get section: {section_id}")
+
+    return SectionSchema.model_validate(result._asdict())
 
 
 async def update_section(
     conn: AsyncConnection,
     comment_id: uuid.UUID,
-    updated_section: UpdateSection,
+    updated_section: SectionUpdateSchema,
 ) -> None:
     await conn.execute(
         update(

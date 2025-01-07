@@ -2,15 +2,20 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import insert, select, update, delete
+from sqlalchemy import insert
+from sqlalchemy import delete
+from sqlalchemy import select
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
-from src.services.comments.schemas import Comment, UpdateComment, CommentRead
+from src.services.comments.schemas import CommentSchema
+from src.services.comments.schemas import CommentUpdateSchema
+from src.services.comments.schemas import CommentGetSchema
 
 
 async def create_comment(
     conn: AsyncConnection,
-    comment: Comment,
+    comment: CommentSchema,
 ) -> None:
     await conn.execute(
         insert(
@@ -24,7 +29,7 @@ async def create_comment(
 async def list_comments(
     conn: AsyncConnection,
     article_id: uuid.UUID,
-) -> List[CommentRead]:
+) -> List[CommentGetSchema]:
     query = select(
         models.comment,
     ).where(
@@ -33,13 +38,13 @@ async def list_comments(
 
     rows = list(await conn.execute(query))
 
-    return [CommentRead.model_validate(row._asdict()) for row in rows]
+    return [CommentGetSchema.model_validate(row._asdict()) for row in rows]
 
 
 async def get_comment(
     conn: AsyncConnection,
     comment_id: uuid.UUID,
-) -> CommentRead:
+) -> CommentGetSchema:
     query = select(
         models.comment,
     ).where(
@@ -47,13 +52,16 @@ async def get_comment(
     )
 
     result = (await conn.execute(query)).fetchone()
-    return CommentRead.model_validate(result._asdict())
+    if not result:
+        raise ValueError(f"Comment with id {comment_id} not found")
+
+    return CommentGetSchema.model_validate(result._asdict())
 
 
 async def update_comment(
     conn: AsyncConnection,
     comment_id: uuid.UUID,
-    updated_comment: UpdateComment,
+    updated_comment: CommentUpdateSchema,
 ) -> None:
     await conn.execute(
         update(

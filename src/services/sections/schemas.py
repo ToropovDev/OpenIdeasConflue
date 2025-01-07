@@ -4,7 +4,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 
-class Section(BaseModel):
+class SectionSchema(BaseModel):
     model_config = ConfigDict(
         extra="ignore",
     )
@@ -13,8 +13,8 @@ class Section(BaseModel):
     parent_section_id: Optional[uuid.UUID] = None
 
 
-class UpdateSection(Section): ...
+class SectionUpdateSchema(SectionSchema): ...
 
 
-class GetSection(Section):
+class SectionGetSchema(SectionSchema):
     id: uuid.UUID

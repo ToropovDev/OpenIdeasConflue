@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src.db.base import connect as db_connect
 from src.db import models
-from src.services.files.schemas import FileRead
+from src.services.files.schemas import FileSchema
 
 
 async def create_file(
@@ -24,7 +24,7 @@ async def create_file(
 async def get_file(
     conn: AsyncConnection,
     file_id: uuid.UUID,
-) -> FileRead:
+) -> FileSchema:
     result = await conn.execute(
         select(
             models.file,
@@ -34,4 +34,7 @@ async def get_file(
     )
 
     file = result.fetchone()
-    return FileRead.model_validate(file._asdict())
+    if not file:
+        raise ValueError(f"File with id {file_id} does not exist")
+
+    return FileSchema.model_validate(file._asdict())

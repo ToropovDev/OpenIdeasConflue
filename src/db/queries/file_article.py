@@ -1,6 +1,8 @@
 import uuid
 
-from sqlalchemy import insert, delete, select
+from sqlalchemy import insert
+from sqlalchemy import delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
 
@@ -45,6 +47,8 @@ async def get_article_files(
 
     result = await conn.execute(query)
     rows = result.fetchall()
-    rows = [row._asdict()["file_id"] for row in rows]
 
-    return rows
+    if not rows:
+        return []
+
+    return [row._asdict()["file_id"] for row in rows]

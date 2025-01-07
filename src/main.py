@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
@@ -23,6 +25,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 @app.middleware("http")
 async def error_handling_middleware(request: Request, call_next):
@@ -30,23 +35,28 @@ async def error_handling_middleware(request: Request, call_next):
         response = await call_next(request)
         return response
 
-    except ValidationError as e:
+    except ValidationError as exc_info:
+        logger.error(str(exc_info))
+
         return responses.ValidationError(
             content={
-                "details": str(e),
+                "details": str(exc_info),
                 "error": "Validation error",
             },
         )
 
-    except IntegrityError as e:
+    except IntegrityError as exc_info:
+        logger.error(str(exc_info))
+
         return responses.BadRequest(
             content={
-                "details": str(e),
+                "details": str(exc_info),
                 "error": "Integrity error",
             },
         )
 
-    except BaseException:
+    except BaseException as exc_info:
+        logger.error(str(exc_info))
         return responses.InternalError(
             content={
                 "details": None,

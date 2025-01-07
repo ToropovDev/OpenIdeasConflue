@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import List, cast
 
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, delete
 from sqlalchemy import insert, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
@@ -138,5 +138,31 @@ async def update_article_is_draft(
         )
         .values(
             is_draft=bool(is_draft),
+        )
+    )
+
+
+async def delete_article(
+    conn: AsyncConnection,
+    article_id: uuid.UUID,
+) -> None:
+    await conn.execute(
+        delete(
+            models.score,
+        ).where(
+            models.score.c.article_id == article_id,
+        )
+    )
+    await conn.execute(
+        delete(
+            models.comment,
+        ).where(
+            models.comment.c.article_id == article_id,
+        )
+    )
+
+    await conn.execute(
+        delete(models.article).where(
+            models.article.c.id == article_id,
         )
     )

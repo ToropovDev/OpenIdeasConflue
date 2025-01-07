@@ -2,10 +2,10 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
-from src.services.comments.schemas import Comment, UpdateComment
+from src.services.comments.schemas import Comment, UpdateComment, CommentRead
 
 
 async def create_comment(
@@ -24,7 +24,7 @@ async def create_comment(
 async def list_comments(
     conn: AsyncConnection,
     article_id: uuid.UUID,
-) -> List[Comment]:
+) -> List[CommentRead]:
     query = select(
         models.comment,
     ).where(
@@ -33,13 +33,13 @@ async def list_comments(
 
     rows = list(await conn.execute(query))
 
-    return [Comment.model_validate(row._asdict()) for row in rows]
+    return [CommentRead.model_validate(row._asdict()) for row in rows]
 
 
 async def get_comment(
     conn: AsyncConnection,
     comment_id: uuid.UUID,
-) -> Comment:
+) -> CommentRead:
     query = select(
         models.comment,
     ).where(
@@ -47,7 +47,7 @@ async def get_comment(
     )
 
     result = (await conn.execute(query)).fetchone()
-    return Comment.model_validate(result._asdict())
+    return CommentRead.model_validate(result._asdict())
 
 
 async def update_comment(
@@ -65,5 +65,18 @@ async def update_comment(
         .values(
             updated_at=datetime.now(),
             **updated_comment.model_dump(),
+        )
+    )
+
+
+async def delete_comment(
+    conn: AsyncConnection,
+    comment_id: uuid.UUID,
+) -> None:
+    await conn.execute(
+        delete(
+            models.comment,
+        ).where(
+            models.comment.c.id == comment_id,
         )
     )

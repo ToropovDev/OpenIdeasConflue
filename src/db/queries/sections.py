@@ -2,9 +2,7 @@ import uuid
 from collections import defaultdict
 from typing import List, Any, Optional
 
-import pydantic
 from sqlalchemy import insert, select, update, delete
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncConnection
 from src.db import models
 from src.services.articles.schemas import Article
@@ -75,9 +73,7 @@ async def list_sections(conn: AsyncConnection) -> List[dict[str, Any]]:
             ],
         }
 
-    return [
-        attach_children_and_articles(section) for section in children_map[None]
-    ]
+    return [attach_children_and_articles(section) for section in children_map[None]]
 
 
 async def get_section(
@@ -114,7 +110,9 @@ async def update_section(
 
 async def delete_section(conn: AsyncConnection, section_id: uuid.UUID):
     async def get_all_section_ids(section_id: uuid.UUID) -> List[uuid.UUID]:
-        query = select(models.section.c.id,).where(
+        query = select(
+            models.section.c.id,
+        ).where(
             models.section.c.parent_section_id == section_id,
         )
         rows = await conn.execute(query)

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, confloat
 
 
 class ArticleBase(BaseModel):
@@ -25,6 +25,7 @@ class ArticleCreate(ArticleBase): ...
 class Article(ArticleBase):
     id: uuid.UUID
     created_at: datetime = datetime.now()
+    avg_score: confloat(ge=0, le=5)
 
 
 class UpdateArticle(ArticleBase):

@@ -2,16 +2,16 @@ import uuid
 from datetime import datetime
 from typing import List, cast
 
-from sqlalchemy import select
+from sqlalchemy import select, func, and_
 from sqlalchemy import insert, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src.db import models
 from src.db.queries.file_article import get_article_files
-from src.services.articles.schemas import Article, UpdateArticle
+from src.services.articles.schemas import Article, UpdateArticle, ArticleCreate
 
 
-async def create_article(conn: AsyncConnection, article: Article) -> uuid.UUID:
+async def create_article(conn: AsyncConnection, article: ArticleCreate) -> uuid.UUID:
     article_id = await conn.scalar(
         insert(
             models.article,
@@ -37,17 +37,33 @@ async def list_article(
     query = select(
         models.article,
     ).where(
-        models.article.c.section_id == section_id,
+        and_(
+            models.article.c.section_id == section_id,
+            models.article.c.is_draft.is_(False),
+        )
     )
     rows = list(await conn.execute(query))
 
-    articles = [Article.model_validate(row._asdict()) for row in rows]
+    articles = []
+    for row in rows:
+        article_data = row._asdict()
 
-    for article in articles:
-        article.files = await get_article_files(
-            conn,
-            article_id=article.id,
+        avg_score_query = select(
+            func.avg(models.score.c.value).label("avg_score"),
+        ).where(
+            models.score.c.article_id == article_data["id"],
         )
+
+        avg_score_result = await conn.execute(avg_score_query)
+        avg_score = avg_score_result.scalar()
+        article_data["avg_score"] = avg_score if avg_score is not None else 0
+
+        article_data["files"] = await get_article_files(
+            conn,
+            article_id=article_data["id"],
+        )
+
+        articles.append(Article.model_validate(article_data))
 
     return articles
 
@@ -60,7 +76,28 @@ async def get_article(conn: AsyncConnection, article_id: uuid.UUID) -> Article:
     )
 
     result = (await conn.execute(query)).fetchone()
-    return Article.model_validate(result._asdict())
+
+    avg_score_query = select(
+        func.avg(models.score.c.value).label("avg_score"),
+    ).where(
+        models.score.c.article_id == article_id,
+    )
+    avg_score_result = await conn.execute(avg_score_query)
+    avg_score = avg_score_result.scalar()
+
+    article = Article.model_validate(
+        {
+            **result._asdict(),
+            "avg_score": avg_score if avg_score is not None else 0,
+        },
+    )
+
+    article.files = await get_article_files(
+        conn,
+        article_id=article.id,
+    )
+
+    return article
 
 
 async def update_article(

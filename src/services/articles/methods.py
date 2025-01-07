@@ -44,6 +44,7 @@ async def create_article(
     return responses.OK(
         content={
             "details": None,
+            "article_id": str(article_id),
         },
     )
 

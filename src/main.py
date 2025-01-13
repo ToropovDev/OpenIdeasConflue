@@ -1,6 +1,7 @@
 import logging
+from sys import prefix
 
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 from pydantic import ValidationError
@@ -16,6 +17,8 @@ from src.services.scores.methods import router as scores_router
 app = FastAPI(
     version="1.0.0",
 )
+
+api_router = APIRouter(prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
@@ -74,4 +77,6 @@ routers = [
 ]
 
 for router in routers:
-    app.include_router(router)
+    api_router.include_router(router)
+
+app.include_router(api_router)

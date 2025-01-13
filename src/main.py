@@ -19,6 +19,8 @@ app = FastAPI(
     root_path="/api"
 )
 
+api_router = APIRouter()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

@@ -28,7 +28,7 @@ deploy-test:
     - echo "Останавливаю старую версию сервиса"
     - if [ "$(docker ps -a -q --filter ancestor=$CI_REGISTRY_IMAGE)" ]; then docker stop $(docker ps -a -q --filter ancestor=$CI_REGISTRY_IMAGE); else echo "Нет запущенных контейнеров для остановки"; fi
     - echo "Удаляю устаревшие образ"
-    - if [ "$(docker images --filter -q reference=$CI_REGISTRY_IMAGE)" ]; then docker image remove -f $(docker images --filter -q reference=$CI_REGISTRY_IMAGE); else echo "Нет образов для удаления"; fi
+    - if [ "$(docker images -q --filter reference=$CI_REGISTRY_IMAGE)" ]; then docker image remove -f $(docker images --filter -q reference=$CI_REGISTRY_IMAGE); else echo "Нет образов для удаления"; fi
     - echo "Заполняю env файл"
     - cat $ENV_FILE > .env
     - echo "Запускаю новую версию сервиса"

@@ -25,10 +25,10 @@ deploy-test:
   tags:
     - shell
   script:
-    - echo "Останавливаю запущенные контейнеры, если они есть"
-    - if [ "$(docker ps -a --format {{.ID}})" ]; then docker stop $(docker ps -a --format {{.ID}}); else echo "Нет запущенных контейнеров для остановки"; fi
-    - echo "Удаляю устаревшие образы, если они есть"
-    - if [ "$(docker images --format {{.ID}})" ]; then docker image remove -f $(docker images --format {{.ID}}); else echo "Нет образов для удаления"; fi
+    - echo "Останавливаю старую версию сервиса"
+    - if [ "$(docker ps -a -q --filter ancestor=$CI_REGISTRY_IMAGE)" ]; then docker stop $(docker ps -a -q --filter ancestor=$CI_REGISTRY_IMAGE); else echo "Нет запущенных контейнеров для остановки"; fi
+    - echo "Удаляю устаревшие образ"
+    - if [ "$(docker images --filter -q reference=$CI_REGISTRY_IMAGE)" ]; then docker image remove -f $(docker images --filter -q reference=$CI_REGISTRY_IMAGE); else echo "Нет образов для удаления"; fi
     - echo "Заполняю env файл"
     - cat $ENV_FILE > .env
     - echo "Запускаю новую версию сервиса"

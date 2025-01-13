@@ -16,9 +16,8 @@ from src.services.scores.methods import router as scores_router
 
 app = FastAPI(
     version="1.0.0",
+    root_path="/api"
 )
-
-api_router = APIRouter(prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
@@ -78,5 +77,3 @@ routers = [
 
 for router in routers:
     api_router.include_router(router)
-
-app.include_router(api_router)

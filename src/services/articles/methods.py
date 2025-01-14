@@ -16,6 +16,7 @@ from src.db.queries.articles import update_article as _update_article
 from src.db.queries.articles import get_article as _get_article
 from src.db.queries.file_article import add_to_article, update_article_files
 from src.services.articles.schemas import UpdateArticle, ArticleCreate
+from src.db.queries.articles import get_article_avg_score as _get_article_avg_score
 
 router = APIRouter(
     prefix="/articles",
@@ -75,6 +76,16 @@ async def get_article(
         content={"articles": article.model_dump(mode="json")},
     )
 
+@router.get("/avg_score/{article_id}")
+async def get_article_avg_score(
+    article_id: uuid.UUID,
+) -> JSONResponse:
+    async with db_connect() as conn:
+        avg_score = await _get_article_avg_score(conn, article_id)
+
+    return responses.OK(
+        content={"average_score": avg_score},
+    )
 
 @router.put("/{article_id}")
 async def update_article(

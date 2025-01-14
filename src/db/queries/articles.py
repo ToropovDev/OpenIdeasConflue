@@ -2,11 +2,12 @@ import uuid
 from datetime import datetime
 from typing import List, cast
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy import insert, update
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from src.db import models
+from src.db.models import score
 from src.db.queries.file_article import get_article_files
 from src.services.articles.schemas import Article, UpdateArticle
 
@@ -103,3 +104,14 @@ async def update_article_is_draft(
             is_draft=bool(is_draft),
         )
     )
+
+
+async def get_article_avg_score(conn: AsyncConnection, article_id: uuid.UUID) -> float:
+    query = select(func.avg(score.c.score)).where(score.c.article_id == article_id)
+    result = await conn.execute(query)
+    avg_score = result.scalar()
+
+    if avg_score is not None:
+        avg_score = float(avg_score)
+
+    return avg_score

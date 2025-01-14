@@ -9,7 +9,7 @@ from sqlalchemy import (
     JSON,
     Integer,
     Boolean,
-    ForeignKey,
+    ForeignKey, CheckConstraint,
 )
 import uuid
 
@@ -42,6 +42,14 @@ section = Table(
     Column("parent_section_id", UUID, nullable=True),
 )
 
+score = Table(
+    "scores",
+    metadata,
+    Column("id", UUID, primary_key=True, default=uuid.uuid4(), unique=True),
+    Column("score", Integer, nullable=True, default=0),
+    Column("article_id", UUID(as_uuid=True), ForeignKey("article.id", ondelete="CASCADE"), nullable=False),
+    CheckConstraint("score >= 0 AND score <= 10", name="check_score_range"),
+)
 
 file = Table(
     "file",

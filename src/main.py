@@ -19,7 +19,7 @@ app = FastAPI(
     root_path="/api"
 )
 
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter()
 
 app.add_middleware(
     CORSMiddleware,

@@ -6,7 +6,7 @@ from fastapi import APIRouter, UploadFile, File
 from src import responses
 from src.db.queries.files import get_file as _get_file
 from src.services.files.s3_client import upload
-
+import pyshorteners
 router = APIRouter(prefix="/files", tags=["files"])
 
 logging.basicConfig(level=logging.INFO)
@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 @router.post("/upload")
 async def upload_file(
-    file: UploadFile = File(...),
-):
+    file: UploadFile = File(...),):
     url = await upload(
         file=file,
     )
@@ -25,7 +24,7 @@ async def upload_file(
 
     return responses.OK(
         content={
-            "details": url,
+            "details": pyshorteners.Shortener().clckru.short(url),
         },
     )
 

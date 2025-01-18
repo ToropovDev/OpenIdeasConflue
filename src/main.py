@@ -4,6 +4,8 @@ from src.services.articles.methods import router as article_router
 from src.services.comments.methods import router as comment_router
 from src.services.sections.methods import router as section_router
 from src.services.files.methods import router as file_router
+from src.services.auth.methods import router as auth_router
+
 
 app = FastAPI(
     version="0.0.1",
@@ -17,13 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ia@aratrum.ru
+#
+# MdS-xdG-nMs-ja3
 
-routers = [
-    comment_router,
-    file_router,
-    article_router,
-    section_router,
-]
+routers = [comment_router, file_router, article_router, section_router, auth_router]
 
 for router in routers:
     app.include_router(router)

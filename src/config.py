@@ -34,6 +34,8 @@ POSTGRES_PORT: int = env.int("POSTGRES_PORT", 5433)
 POSTGRES_DATABASE: str = env.str("POSTGRES_DATABASE", "unknown")
 POSTGRES_USER: str = env.str("POSTGRES_USER", "unknown")
 POSTGRES_PASSWORD: str = env.str("POSTGRES_PASSWORD", "unknown")
+OPEN_IDEAS_URL: str = env.str("OPEN_IDEAS_URL", "unknown")
+OPEN_IDEAS_PROTECTED_ENDPOINT: str = env.str("OPEN_IDEAS_PROTECTED_ENDPOINT", "unknown")
 
 POSTGRES = _PGSettings(
     host=POSTGRES_HOST,
